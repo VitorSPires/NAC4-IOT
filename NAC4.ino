@@ -1,45 +1,41 @@
-#include <Adafruit_SSD1306.h> // biblioteca do display oled
-#define OLED_Address 0x3C 
-Adafruit_SSD1306 oled(128,64); 
+#include <ArduinoJson.h> // biblioteca JSON
 
-#include <ArduinoJson.h>
-
-int x=0;
-int lastx=0;
-int lasty=60;
-
-int estadobotao;
-int contador = 0;
-int templast;
-int TermistorPin = A3;
+// Variáveis para leitor de temperatura
 int Vo;
 float R1 = 10000;
 float logR2, R2, T, Tc, Tf, temp;
 float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07; //valores constante para calculo
 
+// Variáveis para leitor de luminosidade
 float valor_ldr;
 float alpha;
 float resistencia;
 float ldr;
 float rldr;
+
+// Variáveis para leitor de velocidade do vento
+float valor_anemometro;
+volatile unsigned long cont = 0;
+unsigned long tempo = 0;
+bool alerta = false;
+int timer = 0;
  
 void setup() {
   Serial.begin(9600);
 
   //variaveis
-  pinMode(2,INPUT);
-  pinMode(TermistorPin, INPUT);
-  pinMode(A2, INPUT);
+  pinMode(2,INPUT); // Gerador de ondas
+  attachInterrupt(digitalPinToInterrupt(2), interrupcao, RISING);
+  pinMode(A3, INPUT); // Termistor
+  pinMode(A2, INPUT); // LDR
 
-  oled.begin(SSD1306_SWITCHCAPVCC, OLED_Address);
-  oled.clearDisplay();
-  oled.setTextSize(1);
-  oled.setTextColor(WHITE);
 }
 
 void loop() {
 
 	StaticJsonDocument<100> json; //cria o objeto Json
+		
+	bool alerta = false; // definindo alerta como falso
 
 	// Lendo a temperatura
 	Vo = analogRead(A3);
@@ -55,46 +51,34 @@ void loop() {
 	 resistencia = 127410/rldr;
 	 ldr = pow(resistencia, alpha);
 	
-	
-	// Configurando o botao
-	estadobotao = digitalRead(2);
-  	if(estadobotao == LOW){
-		contador = contador + 1;
-		// mostrando valores no serial
-  		//Serial.print("Intensidade luminosa: "); 
-  		//Serial.println(ldr);
-  		//Serial.print("Temperatura corporal: "); 
-  		//Serial.println(Tc);
+	// Leitura do Anemômetro
+	if( (millis() - tempo) > 999){
+    	tempo = millis();
+	valor_anemometro = (cont/5) * 6.154;
+    	cont = 0;
+  	}
 
-		//formato de leitura no node-red
-		json["luminosidade"] = ldr;
-		json["temperatura"] = Tc;
-		serializeJson(json, Serial);
-		Serial.println();
-		
-		delay(500);
-		if(contador == 2){
-			contador = 0;}
-	 }
-	
-	// Exibir temperatura no display OLED
-	if(contador == 0){
-		oled.clearDisplay();
-  		oled.setCursor(0,25);
-  		oled.setTextColor(WHITE);
-  		oled.print("Temperatura Corporal:");
- 		oled.print(Tc);
-  		oled.display();
+	// emite até 1 alerta por hora caso frequência esteja acima de 13Hz
+	if(valor_anemometro >= 80 && timer == 0){ 
+	alerta = true;
+	timer = 3600;
+	} else if(timer != 0){
+	timer -= 5;
 	}
 	
-	// Exibir Lux no display OLED
-	if(contador == 1){
-		oled.clearDisplay();
-		oled.setCursor(0,25);
-		oled.setTextColor(WHITE);
-		oled.print("Intensidade luminosa:");
-		oled.print(ldr);
-		oled.display();
-	}
+	//formatode leitura no node-red
+	json["luminosidade"] = ldr;
+	json["temperatura"] = Tc;
+	json["vento"] = valor_anemometro;
+	json["alerta"] = alerta;
+	serializeJson(json, Serial);
+	Serial.println();
 	
+	delay(5000);
+	
+}
+
+// interrupção para saber a frequência do anemômetro
+void interrupcao(){ 
+  cont++;
 }

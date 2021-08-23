@@ -27,11 +27,12 @@ git clone https://github.com/VitorSPires/NAC4-IOT
     - [com0com](https://github.com/VitorSPires/NAC4-IOT/files/7010892/com0com.zip)
     - <a href="https://nodered.org" target="_blank">Node-RED</a>
 
-3. **Configurando o Com0com**:
+3. **Configurando o Com0com**
     - <a href="https://www.youtube.com/watch?v=I6YIPL_p-L0" target="_blank">Tutorial</a>
 
 4. **Rodando o sistema**
-    Após a instalação dos softwares necessários, abra o SimulIDE e importe os arquivos de extensão _.simu_ e _.ino_ para e depois importe o código para o controlador. Inicie a simulação e o sistema será ativado.
+
+      Após a instalação dos softwares necessários, abra o SimulIDE e importe os arquivos de extensão _.simu_ e _.ino_ para e depois importe o código para o controlador. Inicie a simulação e o sistema será ativado.
  
 5. **Fazendo alterações**
 

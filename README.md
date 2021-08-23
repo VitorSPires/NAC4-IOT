@@ -46,7 +46,7 @@ git clone https://github.com/VitorSPires/NAC4-IOT
           - <a href="https://127.0.0.1:1880/ui/" target="_blank">Dashboard</a>
 
 ## Link de vídeo demonstração
-###### _vídeo em produção_
+<a href="https://www.youtube.com/watch?v=baFG36Lkv8Y" target="_blank">Demonstração NAC4</a>
 
 ## Referências
 - <a href="https://github.com/VitorSPires/NAC4-IOT/files/7010818/s2-NAC4.pptx" target="_blank">Proposta-NAC4</a>
